@@ -1,4 +1,4 @@
-# Environment Parameter Gradient (EnvPG) for co-design in reinforcement learning
+# Environment Parameter Gradient (EnvPG) for Co-Design in Reinforcement Learning
 
 Code accompanying *"Environment Parameter Gradient Theorem for Co-Design in Reinforcement Learning"* (IEEE Control Systems Letters).
 
