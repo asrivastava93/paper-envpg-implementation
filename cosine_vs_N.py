@@ -118,27 +118,25 @@ def ema(G, b=0.9):
         m = b * m + (1 - b) * g
     return m
 
-
 def stored_cosines(ctx, a, tag, it, env, actor, beta):
-    """cosine of the stored training gradient (hist['gz']) with the exact gradient, see the docstring (--stored)."""
+    """cosine of the stored training gradient of the FIRST row of outer iteration it-1 with the exact gradient
+    at pi_theta_k = actor of checkpoint p(it-1), zeta_k = its zeta, beta = its stored beta (no un-annealing)."""
     fn = os.path.join(a['hist_root'], tag, f'hist_{tag}.npz')
-    if not os.path.exists(fn):
+    if not os.path.exists(fn) or it < 2:
         return None
     h = np.load(fn)
-    GZ, ZH, ITR = h['gz'], h['zeta'], h['iteration']
-    rows = np.where(ITR == it - 1)[0]                                   # rows of outer iteration it-1 (0-based in the history)
-    if len(rows) == 0 or rows[-1] < 30:
+    GZ, ITR = h['gz'], h['iteration']
+    rows = np.where(ITR == it - 1)[0]
+    if len(rows) == 0:
         return None
-    r = int(rows[-1])
-    z0 = ZH[r - 1].reshape(ZH.shape[1], ZH.shape[2]).astype(float)       # placement at which row r's gradient was taken
-    gx0 = exact_gradient(ctx, z0, env, actor, beta)
+    r = int(rows[0])                                                      # first row of the outer iteration
+    ck0, actor0, _, z0 = ctx.load(os.path.join(a['root'], tag, f'ckpt_{tag}_p{it-1:03d}.pt'), env)
+    gx0 = exact_gradient(ctx, z0, env, actor0, float(ck0['beta']))
     Lr = float(h['mean_len'][r])
-    out = dict(row=r, exact_norm=float(np.linalg.norm(gx0)))
-    for name, g in (('single', GZ[r]), ('ema30', ema(GZ[r - 29:r + 1]))):
-        g = np.asarray(g, dtype=float) * Lr
-        out[name] = cosine(g, gx0)
-    out['norm_ratio'] = float(np.linalg.norm(GZ[r] * Lr) / (np.linalg.norm(gx0) + 1e-12))
-    return out
+    g = np.asarray(GZ[r], dtype=float) * Lr
+    c = cosine(g, gx0)
+    return dict(row=r, exact_norm=float(np.linalg.norm(gx0)), single=c, ema30=float('nan'),
+                norm_ratio=float(np.linalg.norm(g) / (np.linalg.norm(gx0) + 1e-12)))
 
 
 def process_run(job):
