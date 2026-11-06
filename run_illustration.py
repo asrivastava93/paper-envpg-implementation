@@ -22,7 +22,7 @@ KAPPA = 0.90
 PLACEMENT = 7                                    # tag k090_P7
 # (x1, y1, x2, y2, ...) for f1..f5: an irregular cluster of five relays around (6, 3); all pairwise distances >= 0.36
 # (the training script pushes apart relays that are closer than CFG['kick_sep'] = 0.3, so none is kicked at the start)
-P7 = [6.35, 3.15, 5.85, 3.40, 6.15, 2.70, 5.65, 2.95, 6.00, 3.05]
+P7 = [5.75, 2.45, 5.35, 3.25, 6.30, 2.30, 5.80, 3.00, 6.20, 3.35]
 
 
 def register_p7():
