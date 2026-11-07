@@ -2,11 +2,11 @@
 plot_trajectory.py -- how the UAV positions f_1..f_5 move during training of ONE run, and the exact cost of the current placement.
 
     python plot_trajectory.py --root new_EnvPG_Runs_1 --tag k085_P3 --oracle results_oracle_h0.2
-    options: --max_it 100 (last outer iteration drawn)  --every 10 (dots on the paths every this many outer iterations)  --fs 1.0
+    options: --max_it 100 (last outer iteration drawn)  --every 10 (the paths are joined through the placements every this many outer iterations)  --fs 1.0
              --panels both|paths|cost   --out paper_figures
 
 Reads <root>/<tag>/hist_<tag>.npz ('zeta' = placement after every update row, 50 rows per outer iteration; 'zeta_init').
-(a) paths: one coloured line per UAV from the initial placement (circle) to the final one (triangle); dots every --every outer iterations;
+(a) paths: one coloured line per relay from the initial placement (circle) to the final one (triangle), joined through the placements every --every outer iterations;
     user nodes in grey, destination star; with --oracle also the oracle's final positions as hollow triangles (matched colours).
 (b) exact hard-min cost J*(zeta_t) of the placement at the end of every outer iteration (policy iteration on the exact kernel),
     with the oracle's J* as a dashed line.
@@ -62,17 +62,15 @@ def main():
         d = coords[env.idx_delta_state]; ax.scatter(*d, c='black', s=400, marker='*', zorder=4)
         ax.annotate(r'$\delta$', d, textcoords='offset points', xytext=(-25, -9), fontsize=22 * F, fontweight='bold')
         for j in range(5):
-            Q_ = Zit if a.path == 'iters' else P
-            ax.plot(Q_[:, j, 0], Q_[:, j, 1], color=COL[j], lw=2.0, zorder=2)
-            idx = [i for i in range(0, nit + 1) if i % a.every == 0 and i > 0]
-            ax.scatter(Zit[idx, j, 0], Zit[idx, j, 1], color=COL[j], s=28, zorder=3, edgecolors='white', linewidths=0.6)
+            pts = sorted(set(list(range(0, nit + 1, a.every)) + [nit]))          # only the marked iterations: 0, every, 2*every, ..., nit
+            ax.plot(Zit[pts, j, 0], Zit[pts, j, 1], color=COL[j], lw=2.0, zorder=2)
             ax.scatter(*Z0[j], facecolors='white', edgecolors=COL[j], s=150, linewidths=2.6, zorder=6)        # initial (above the final marker)
             ax.scatter(*Zit[-1, j], c=COL[j], marker='^', s=400, edgecolors='black', linewidths=0.8, zorder=5)   # final
-            #ax.annotate(f'$f_{{{j + 1}}}$', Zit[-1, j], textcoords='offset points', xytext=(9, 6), fontsize=25 * F, zorder=6)
-            left = {1, 2}                                   # j = 1, 2  ->  f2 and f3 go to the left of the final marker
-            dx = -9 if j in left else 9
-            ax.annotate(f'$f_{{{j + 1}}}$', Zit[-1, j], textcoords='offset points', xytext=(dx, 6),
-                ha='right' if j in left else 'left', fontsize=25 * F, zorder=6)
+            lab_off = {0: (-9, 11, 'right'), 1: (11, 8, 'left'), 2: (10, 0, 'left'), 3: (-9, -12, 'right'), 4: (21, 27, 'left')}   # (dx, dy, alignment) in points
+            dx, dy, ha_ = lab_off[j]
+            ax.annotate(f'$f_{{{j + 1}}}$', Zit[-1, j], textcoords='offset points', xytext=(dx, dy), ha=ha_, va='center',
+                        fontsize=25 * F, zorder=7,
+                        arrowprops=dict(arrowstyle='-', color='#555555', lw=0.8, shrinkA=2, shrinkB=11) if j == 4 else None)
         if zo is not None:
             r, c = linear_sum_assignment(np.linalg.norm(Zit[-1][:, None] - zo[None], axis=2))
             for i, jj in zip(r, c):
