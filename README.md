@@ -22,11 +22,11 @@ It contains the EnvPG actor-critic algorithm, the two baselines of the paper (a 
 
 ## Requirements
 
-Python 3.x with `numpy`, `scipy`, `torch` and `matplotlib` (see `requirements.txt`). Everything runs on CPU.
+Python 3.x with `numpy`, `scipy`, `torch` and `matplotlib`.
 
 ## Experiment
 
-Four values of the link reliability kappa in {0.85, 0.90, 0.95, 1.00} and six initial relay placements P1 to P6 (24 runs per method). The hop cost is 0.2 (set in `env2_paraRLModel.py`).
+Four values of the link reliability kappa in {0.85, 0.90, 0.95, 1.00} and six initial relay placements P1 to P6 (24 runs per method).
 
 ## Running
 
@@ -45,8 +45,6 @@ python benchmark_oracle_runs.py --kappas 0.95 --placements 6 --beta_min 10 --out
 ```
 
 To run all 24 EnvPG (or SF) runs, loop over `--kappa 0.85 0.90 0.95 1.00` and `--placement 1 ... 6`, for example in a shell loop or with GNU parallel.
-
-In EnvPG the relay-location gradient is estimated with the policy `pi_{theta_k}` of the same iteration as the critic (`zeta_at_theta_k = True` in `CFG`).
 
 ## Reproducing the figure
 
@@ -70,8 +68,6 @@ python plot_jstar.py --root results --csv jstar_curves.csv --max_it 100
 python plot_grad_norm_old.py --root results --agg pick --pick P4 --window 200 --min_row 10
 ```
 
-Use the same arguments as for the paper figure for the cosine and plot scripts; `--help` lists all options. The exact values of J* and of the gradient are computed on the analytic kernel for evaluation only. The training of EnvPG never uses it.
-
 ## Citation
 
-If you use this code, please cite the paper (reference to be added after publication).
+If you use this code, please cite the preliminary version (arXiv:2607.12590v2).
