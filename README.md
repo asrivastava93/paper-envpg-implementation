@@ -1,6 +1,6 @@
 # Environment Parameter Gradient (EnvPG) for Co-Design in Reinforcement Learning
 
-Code accompanying *"Environment Parameter Gradient Theorem for Co-Design in Reinforcement Learning"* (IEEE Control Systems Letters).
+Code accompanying *"Environment Parameter Gradient Theorem for Co-Design in Reinforcement Learning"* (arXiv:2607.12590v2).
 
 It contains the EnvPG actor-critic algorithm, the two baselines of the paper (a model-based oracle and a score-function co-design baseline), and the scripts that produce the figure and table of the Simulation section (aerial relay network design).
 
